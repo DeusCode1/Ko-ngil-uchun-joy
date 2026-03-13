@@ -1,12 +1,12 @@
 // Ko'ngil uchun joy — Quran Mini App (multilingual)
-// SQLite for MVP
+// PostgreSQL (Neon)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
