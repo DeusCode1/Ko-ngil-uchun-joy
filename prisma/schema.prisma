@@ -1,0 +1,79 @@
+// Ko'ngil uchun joy — Quran Mini App (multilingual)
+// SQLite for MVP
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Sura {
+  id        Int      @id
+  nameRu    String?
+  nameAr    String?
+  ayahCount Int
+  ayahs     Ayah[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ayah {
+  id          String     @id // format "2:255"
+  suraId      Int
+  ayahNumber  Int
+  globalIndex Int        @unique
+  sura        Sura       @relation(fields: [suraId], references: [id], onDelete: Cascade)
+  texts       AyahText[]
+  favorites   Favorite[]
+  histories   History[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([suraId, ayahNumber])
+  @@index([suraId, ayahNumber])
+}
+
+model AyahText {
+  id           Int      @id @default(autoincrement())
+  ayahId       String
+  languageCode String   // ar, ru, uz, tr
+  text         String
+  ayah         Ayah     @relation(fields: [ayahId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([ayahId, languageCode])
+  @@index([languageCode])
+}
+
+model UserState {
+  id             Int      @id @default(autoincrement())
+  telegramUserId String   @unique
+  lastReadAyahId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Favorite {
+  id             Int      @id @default(autoincrement())
+  telegramUserId String
+  ayahId         String
+  ayah           Ayah     @relation(fields: [ayahId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+
+  @@unique([telegramUserId, ayahId])
+  @@index([telegramUserId])
+}
+
+model History {
+  id             Int      @id @default(autoincrement())
+  telegramUserId String
+  ayahId         String
+  ayah           Ayah     @relation(fields: [ayahId], references: [id], onDelete: Cascade)
+  openedAt       DateTime @default(now())
+
+  @@index([telegramUserId])
+}
